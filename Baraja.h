@@ -9,7 +9,6 @@ public:
 	Baraja();
 	~Baraja() { ; }
 	void barajar();
-	void saludar() { std::cout << "HOLA" << std::endl; }
 	int getNumCartas() { return numCartas; }
 	Carta repartirCarta();
 
