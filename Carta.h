@@ -23,7 +23,7 @@ typedef enum
 	Corazones
 }Palo;
 
-typedef enum //CUIDADO: NO SON LOS VALORES REALES. PARA EL VALOR REAL HAY QUE SUMAR 1
+typedef enum
 {
 	NoneTipo = -1,
 	As = 0,
