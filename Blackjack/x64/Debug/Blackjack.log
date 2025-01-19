@@ -1,4 +1,6 @@
-﻿  main.cpp
+﻿  Jugador.cpp
+  Partida.cpp
+  Generando código...
   Blackjack.vcxproj -> C:\Users\andre\Desktop\G\Blackjack\x64\Debug\Blackjack.exe
   "pwsh.exe" no se reconoce como un comando interno o externo,
   programa o archivo por lotes ejecutable.

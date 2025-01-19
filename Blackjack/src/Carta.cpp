@@ -4,16 +4,16 @@ std::ostream& operator<<(std::ostream& output, const Carta& carta)
 {
 	switch (carta.getTipo())
 	{
-	case Tipo::As:
+	case Tipo::tAs:
 		output << "As" << " ";
 		break;
-	case Tipo::J:
+	case Tipo::tJ:
 		output << "J" << " ";
 		break;
-	case Tipo::Q:
+	case Tipo::tQ:
 		output << "Q" << " ";
 		break;
-	case Tipo::K:
+	case Tipo::tK:
 		output << "K" << " ";
 		break;
 	default:

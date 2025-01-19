@@ -22,6 +22,8 @@
     <ClInclude Include="src\Baraja.h" />
     <ClInclude Include="src\Carta.h" />
     <ClInclude Include="src\Jugador.h" />
+    <ClInclude Include="src\Motor.h" />
+    <ClInclude Include="src\Partida.h" />
     <ClInclude Include="src\puerto.h" />
   </ItemGroup>
   <ItemGroup>
@@ -29,6 +31,8 @@
     <ClCompile Include="src\Carta.cpp" />
     <ClCompile Include="src\Jugador.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Motor.cpp" />
+    <ClCompile Include="src\Partida.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

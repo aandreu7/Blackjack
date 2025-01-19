@@ -8,9 +8,10 @@ private:
 	int valor;
 	Palo palo;
 	Tipo tipo;
+	int id; // ASSOCIATES CARD WITH TEXTURE
 public:
-	Carta() { valor = -1; palo = Palo::NonePalo, tipo = Tipo::NoneTipo; }
-	Carta(int nValor, Palo nPalo, Tipo nTipo) : valor(nValor), palo(nPalo), tipo(nTipo) { ; }
+	Carta() { valor = -1; palo = Palo::NonePalo, tipo = Tipo::NoneTipo; id = -1; }
+	Carta(int nValor, Palo nPalo, Tipo nTipo, int nId) : valor(nValor), palo(nPalo), tipo(nTipo), id(nId) { ; }
 	~Carta() { ; } 
 	int getValor() const { return valor; }
 	Palo getPalo() const { return palo; }

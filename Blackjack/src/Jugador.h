@@ -2,6 +2,9 @@
 
 #include "puerto.h"
 #include "Carta.h"
+#include "Motor.h"
+
+class Motor;
 
 class Jugador
 {
@@ -33,6 +36,8 @@ public:
 	void anadirCarta(const Carta carta);
 	void actualizarPuntuacion();
 	bool comprovarBlackjack() { return puntuacion == 21; }
+
+	void mostrar(Motor* motor);
 };
 
 std::ostream& operator<<(std::ostream& output, const Jugador& jugador);

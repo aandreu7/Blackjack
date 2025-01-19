@@ -13,6 +13,7 @@ namespace fs = std::filesystem;
 #include <locale.h>
 #include <ctime>
 
+#include <unordered_map>
 
 #define NUM_PALOS 4
 #define NUM_CARTAS 52
@@ -37,12 +38,20 @@ typedef enum
 typedef enum //CUIDADO: NO SON LOS VALORES REALES. PARA EL VALOR REAL HAY QUE SUMAR 1
 {
 	NoneTipo = -1,
-	As = 0,
-	X = 1,
-	J = 2,
-	Q = 3,
-	K = 4
+	tAs = 0,
+	tX = 1,
+	tJ = 2,
+	tQ = 3,
+	tK = 4
 }Tipo;
+
+typedef enum
+{
+	vJ = 11,
+	vQ,
+	vK,
+	vAs
+}ValorTipo;
 
 enum class opcionJugador
 {

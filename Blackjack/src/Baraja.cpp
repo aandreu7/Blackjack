@@ -12,26 +12,27 @@ Baraja::Baraja()
 			switch (iCarta)
 			{
 			case 0:
-				tipo = As;
+				tipo = tAs;
 				valor = 11;
 				break;
 			case 10:
-				tipo = J;
+				tipo = tJ;
 				valor = 10;
 				break;
 			case 11:
-				tipo = Q;
+				tipo = tQ;
 				valor = 10;
 				break;
 			case 12:
-				tipo = K;
+				tipo = tK;
 				valor = 10;
 				break;
 			default:
-				tipo = X;
+				tipo = tX;
 				valor = iCarta + 1;
 			}
-			Carta* nCarta = new Carta(valor, Palo(iPalo), tipo);
+			int id = iPalo * 100 + valor;
+			Carta* nCarta = new Carta(valor, Palo(iPalo), tipo, id);
 			cartas[iPalo * NUM_CARTAS / NUM_PALOS + iCarta] = *nCarta;
 		}
 	}
