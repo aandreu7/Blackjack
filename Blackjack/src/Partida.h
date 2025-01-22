@@ -1,13 +1,45 @@
 #pragma once
 
-#include "puerto.h"
-
 #include "Baraja.h"
-#include "Carta.h"
-#include "Jugador.h"
+
+class Jugador;
+
+class Oponente;
+class Crupier;
 
 class Motor;
 
-#include "Motor.h"
+class Partida 
+{
+    friend class Motor;
 
-void jugar(Motor* motor);
+public:
+
+    Partida() { motor = nullptr; }
+    Partida(Motor* nMotor) { motor = nMotor; }
+
+    ~Partida();
+
+    void jugar();
+
+    void apuestas();
+
+    bool doblarPermitido;
+
+private:
+
+    Baraja* baraja;
+    Oponente* oponente;
+    Crupier* crupier;
+    Motor* motor;
+
+    void jugadorGana(Jugador* ganador, Jugador* perdedor, bool empate);
+    void repartirCartaAMano(Jugador* jugador);
+    void mostrarEstadoJuego(bool mostrarCartasCrupier = false);
+    void mostrarOpciones(bool doblarPermitido);
+    opcionJugador leerJugada(bool doblarPermitido);
+    void crupierJuega();
+    void oponenteJuega();
+    void determinaGanador();
+    bool iniciarJuego(opcionJugador& op);
+};

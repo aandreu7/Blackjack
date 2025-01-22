@@ -1,5 +1,7 @@
 #include "Jugador.h"
 
+#include "Motor.h"
+
 Jugador::Jugador(Carta carta1, Carta carta2)
 {
 	cartasJugador = new Carta[2];
@@ -47,45 +49,62 @@ void Jugador::anadirCarta(const Carta carta)
 	actualizarPuntuacion();
 }
 
-void Jugador::mostrar(Motor* motor)
+float mostrarAux(float posX, float posY, Carta* cartas, Motor* motor, int i)
+{
+	int cardValue = cartas[i].getValor();
+
+	switch (cartas[i].getTipo())
+	{
+	case Tipo::tX:
+		break;
+	case Tipo::tJ:
+		cardValue = ValorTipo::vJ;
+		break;
+	case Tipo::tQ:
+		cardValue = ValorTipo::vQ;
+		break;
+	case Tipo::tK:
+		cardValue = ValorTipo::vK;
+		break;
+	case Tipo::tAs:
+		cardValue = ValorTipo::vAs;
+		break;
+	default:
+		throw ("Invalid card value");
+	}
+
+	return motor->showCard(motor->getCardKey(cardValue, cartas[i].getPalo()), posX, posY);
+}
+
+void Oponente::mostrar(Motor* motor)
+{
+	float xPos = 50.0f;
+	float yPos = 1200.f;
+
+	for (int i = 0; i < nCartas; i++)
+		xPos += mostrarAux(xPos, yPos, cartasJugador, motor, i) + 10.f;
+
+	motor->showText("PUNTUACION OPONENTE: " + std::to_string(puntuacion), xPos, yPos * 1.25);
+}
+
+void Crupier::mostrar(Motor* motor, bool mostrarSegundaCarta)
 {
 	float xPos = 50.0f;
 	float yPos = 20.0f;
 
-	if (rol == rolJugador::Oponente)
-		yPos = 1200.f;
-	
-
 	for (int i = 0; i < nCartas; i++)
 	{
-		int cardValue = cartasJugador[i].getValor();
 
-		switch (cartasJugador[i].getTipo())
+		// Crupier does not show the second card
+		if (nCartas == 2 && !mostrarSegundaCarta && i == 1)
 		{
-		case Tipo::tX:
+			motor->showCard(0, xPos, yPos);
 			break;
-		case Tipo::tJ:
-			cardValue = ValorTipo::vJ;
-			break;
-		case Tipo::tQ:
-			cardValue = ValorTipo::vQ;
-			break;
-		case Tipo::tK:
-			cardValue = ValorTipo::vK;
-			break;
-		case Tipo::tAs:
-			cardValue = ValorTipo::vAs;
-			break;
-		default:
-			throw ("Invalid card value");
 		}
 
-		sf::Sprite* sprite = motor->getCardMap()[motor->getCardKey(cardValue, cartasJugador[i].getPalo())];
-
-		sprite->setPosition(xPos, yPos);
-
-		motor->getWindow().draw(*sprite);
-
-		xPos += sprite->getGlobalBounds().width + 10.f;
+		xPos += mostrarAux(xPos, yPos, cartasJugador, motor, i) + 10.f;
 	}
+
+	if (mostrarSegundaCarta)
+		motor->showText("PUNTUACION CRUPIER: " + std::to_string(puntuacion), xPos, yPos * 1.25);
 }
