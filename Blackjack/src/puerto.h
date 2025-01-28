@@ -13,12 +13,15 @@ namespace fs = std::filesystem;
 #include <locale.h>
 #include <ctime>
 
+#include <fstream>
+#include <nlohmann/json.hpp>
+
 #include <unordered_map>
 
 #define NUM_PALOS 4
 #define NUM_CARTAS 52
 
-#define NUM_BUTTONS 3
+#define NUM_BUTTONS 7
 
 namespace simbolosPalo
 {
@@ -59,7 +62,11 @@ enum class opcionJugador
 {
 	PedirCarta,
 	Plantarse,
-	Doblar
+	Doblar,
+    Subir,
+    Bajar,
+    Apostar,
+    Empezar
 };
 
 enum class rolJugador
@@ -74,9 +81,12 @@ typedef enum
     None = -1,
     Pedir,
     Doblar,
-    Pasar
+    Pasar,
+    Subir,
+    Bajar,
+    Apostar,
+    Empezar
 }ButtonOptions;
-
 
 template <typename T>
 void freeMemory(T*& ptr, bool isArray = false) 
@@ -103,6 +113,7 @@ private:
     
     bool isHovered;
     bool isClicked;
+    bool wasPressed;
 
 public:
     Button(float x, float y, float width, float height, const std::string& text) 
@@ -115,7 +126,7 @@ public:
 
         buttonText.setFont(font);
         buttonText.setString(text);
-        buttonText.setCharacterSize(24);
+        buttonText.setCharacterSize(30);
         buttonText.setFillColor(sf::Color::White);
         buttonText.setPosition(x + width / 4, y + height / 4);
 
@@ -127,24 +138,34 @@ public:
 
         isHovered = false;
         isClicked = false;
+        wasPressed = false;
     }
 
-    void update(sf::RenderWindow& window)
+    void update(sf::RenderWindow& window, sf::Event& event)
     {
         isClicked = false;
 
+        // Verifica si el cursor está sobre el botón
         if (buttonShape.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(window))))
         {
             isHovered = true;
 
-            if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-                isClicked = true;
-            else if (isClicked)
-                isClicked = false;
+            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+            {
+                // Asegura que el click solo se registra una vez
+                if (!wasPressed)
+                {
+                    isClicked = true;
+                    wasPressed = true;
+                }
+            }
         }
         else
             isHovered = false;
+        if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
+            wasPressed = false;
 
+        // Actualiza el color del botón según el estado
         if (isClicked)
             buttonShape.setFillColor(clickColor);
         else if (isHovered)

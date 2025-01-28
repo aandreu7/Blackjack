@@ -21,44 +21,42 @@ private:
 	sf::VideoMode desktop;
 	sf::Texture* backgroundTexture;
 	sf::Sprite* backgroundSprite;
+	sf::Event eventSF;
 
 	unsigned int width;
 	unsigned int height;
 
 	unsigned int sleepTime;
 
-	std::vector<Button*> pregameButtons;
 	std::vector<Button*> gameButtons;
 
 	Partida* partida;
-
-	bool gameStarted;
-
-	void preGrame();
 
 public:
 
 	Motor();
 
-	~Motor() { cardTextures.clear(); cardSprites.clear(); cardMap.clear(); gameButtons.clear(); pregameButtons.clear(); }
+	~Motor() { cardTextures.clear(); cardSprites.clear(); cardMap.clear(); gameButtons.clear(); }
 
 	void goAhead();
 
-	ButtonOptions awaitForInput(Oponente* oponente, Crupier* crupier);
+	const ButtonOptions awaitForInput(bool preGame, Oponente* oponente, Crupier* crupier, int actualizarBotonApuesta = -1, int apuestaSelect = -1);
 
 	void sleepGame(bool mostrarCartasCrupier);
 
 	int getCardKey(int valor, int palo) const { return (valor + palo * 100); }
 
-	ButtonOptions execGameButtons();
+	const ButtonOptions execGameButtons(const int initOption, const int endOption);
 
-	void windowResized(const sf::Event& eventSF);
+	void windowResized();
 
 	void initWindow();
 
 	float showCard(int cardKey, int posX, int posY);
 
 	void showText(const std::string& text, int posX, int posY);
+
+	void showPot(int pot);
 
     // Getters
 	const std::string& getCardFolder() const { return cardFolder; }	

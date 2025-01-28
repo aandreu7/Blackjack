@@ -55,7 +55,6 @@ void Baraja::barajar()
 		cartas[az] = cartas[k];
 		cartas[k] = tmp;
 	}
-
 }
 
 Carta Baraja::repartirCarta()
@@ -63,9 +62,7 @@ Carta Baraja::repartirCarta()
 	Carta* nuevaBaraja = new Carta[numCartas-1];
 	Carta cartaSeleccionada = cartas[0];
 	for (int i = 1; i < numCartas; i++)
-	{
 		nuevaBaraja[i-1] = cartas[i];
-	}
 	delete[] cartas;
 	cartas = nuevaBaraja;
 	nuevaBaraja = nullptr;

@@ -15,16 +15,19 @@ class Partida
 
 public:
 
-    Partida() { motor = nullptr; }
-    Partida(Motor* nMotor) { motor = nMotor; }
+    Partida(Motor* nMotor = nullptr);
 
     ~Partida();
 
     void jugar();
 
-    void apuestas();
+    void apuestasIniciales();
+
+	int getBote() const { return bote; }
 
     bool doblarPermitido;
+
+    bool juegoEmpezado;
 
 private:
 
@@ -33,13 +36,16 @@ private:
     Crupier* crupier;
     Motor* motor;
 
+    int bote;
+
     void jugadorGana(Jugador* ganador, Jugador* perdedor, bool empate);
     void repartirCartaAMano(Jugador* jugador);
-    void mostrarEstadoJuego(bool mostrarCartasCrupier = false);
-    void mostrarOpciones(bool doblarPermitido);
-    opcionJugador leerJugada(bool doblarPermitido);
+    void mostrarEstadoJuego(bool mostrarCartasCrupier = false, bool sleep = true);
+    opcionJugador leerJugada();
     void crupierJuega();
     void oponenteJuega();
     void determinaGanador();
     bool iniciarJuego(opcionJugador& op);
+    void readData();
+    void writeData();
 };

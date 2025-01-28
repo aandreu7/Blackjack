@@ -10,8 +10,8 @@ protected:
 	Carta* cartasJugador;
 	int nCartas;
 	int puntuacion;
-	float apuesta;
-	float banca;
+	int apuesta;
+	int banca;
 
 public:
 	Jugador() { puntuacion = 0; cartasJugador = nullptr; nCartas = 0; apuesta = 0; banca = 0; }
@@ -22,12 +22,12 @@ public:
 	Carta* getCartas() const { return cartasJugador; }
 	int getPuntuacion() const { return puntuacion; }
 	int getNCartas() const { return nCartas; }
-	float getBanca() const { return banca; }
-	float getApuesta() const { return apuesta; }
+	int getBanca() const { return banca; }
+	int getApuesta() const { return apuesta; }
 
 	// SETTERS
-	void setBanca(float nBanca) { banca = nBanca; }
-	void setApuesta(float nApuesta) { apuesta = nApuesta; }
+	void setBanca(int nBanca) { banca = nBanca; }
+	void setApuesta(int nApuesta) { apuesta = nApuesta; }
 
 	void anadirCarta(const Carta carta);
 	void actualizarPuntuacion();

@@ -92,7 +92,7 @@ void Motor::showText(const std::string& text, int posX, int posY)
 	window.draw(displayText);
 }
 
-void Motor::windowResized(const sf::Event& eventSF)
+void Motor::windowResized()
 {
 	// Adjusts the view to the new window size
 	view.setSize(eventSF.size.width, eventSF.size.height);
@@ -116,14 +116,13 @@ void Motor::sleepGame(bool mostrarCartasCrupier)
 
 	while (clock.getElapsedTime().asSeconds() < sleepTime && window.isOpen())
 	{
-		sf::Event eventSleep;
-		while (window.pollEvent(eventSleep))
+		while (window.pollEvent(eventSF))
 		{
-			if (eventSleep.type == sf::Event::Closed)
+			if (eventSF.type == sf::Event::Closed)
 				window.close();
 
-			if (eventSleep.type == sf::Event::Resized)
-				windowResized(eventSleep);
+			if (eventSF.type == sf::Event::Resized)
+				windowResized();
 		}
 	}
 
@@ -136,6 +135,9 @@ void Motor::sleepGame(bool mostrarCartasCrupier)
 
 Motor::Motor()
 {
+	// Initializes random seed
+	std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
 	// Loads card textures
 	cardMap = loadTexturesFromDirectory(cardFolder, cardTextures, cardSprites);
 
@@ -153,34 +155,37 @@ Motor::Motor()
 
 	backgroundSprite = new sf::Sprite(*backgroundTexture);
 
-	// PREGAME BUTTONS
-	Button* apostarB = new Button(width / 2 - 100, height / 2, 200, 200, std::string("Apostar"));
-	Button* seleccB = new Button(width / 2 - 100, height / 2 + 250, 200, 200, std::string("Seleccionar apuesta"));
-	Button* empezarB = new Button(width / 2 - 100, height / 2 + 500, 200, 200, std::string("Empezar"));
+	gameButtons.resize(NUM_BUTTONS, nullptr);
 
-	pregameButtons.push_back(apostarB);
-	pregameButtons.push_back(seleccB);
-	pregameButtons.push_back(empezarB);
+	// PREGAME BUTTONS
+	Button* apostarB = new Button(width / 2, height / 2, 200, 200, std::string("Apostar"));
+	Button* subeB = new Button(width / 2 + 400, height / 2, 200, 200, std::string("Subir"));
+	Button* bajaB = new Button(width / 2 + 800, height / 2, 200, 200, std::string("Bajar"));
+	Button* empiezaB = new Button(width / 2 + 1200, height / 2, 200, 200, std::string("Empezar"));
 
 	// GAME BUTTONS
 	Button* pedirB = new Button(3 * width / 4, height / 2, 200, 200, std::string("Pedir"));
 	Button* doblarB = new Button(3 * width / 4 + 250, height / 2, 200, 200, std::string("Doblar"));
 	Button* pasarB = new Button(3 * width / 4 + 500, height / 2, 200, 200, std::string("Pasar"));
 
-	gameButtons.push_back(pedirB);
-	gameButtons.push_back(doblarB);
-	gameButtons.push_back(pasarB);
+	gameButtons[ButtonOptions::Pedir] = pedirB;
+	gameButtons[ButtonOptions::Doblar] = doblarB;
+	gameButtons[ButtonOptions::Pasar] = pasarB;
+	gameButtons[ButtonOptions::Subir] = subeB;
+	gameButtons[ButtonOptions::Bajar] = bajaB;
+	gameButtons[ButtonOptions::Apostar] = apostarB;
+	gameButtons[ButtonOptions::Empezar] = empiezaB;
 
 	sleepTime = 3; // Sleeps 3 seconds every time a new card is shown
 
 	partida = new Partida(this);
-
-	gameStarted = false;
 }
 
-ButtonOptions Motor::execGameButtons()
+const ButtonOptions Motor::execGameButtons(const int initOption, const int endOption)
 {
-	for (int i = static_cast<int>(ButtonOptions::Pedir); i <= static_cast<int>(ButtonOptions::Pasar); i++)
+	ButtonOptions selectedOption = ButtonOptions::None;
+
+	for (int i = initOption; i <= endOption; i++)
 	{
 		if (!partida->doblarPermitido && i == static_cast<int>(ButtonOptions::Doblar))
 			continue;
@@ -188,13 +193,14 @@ ButtonOptions Motor::execGameButtons()
 		ButtonOptions option = static_cast<ButtonOptions>(i);
 
 		gameButtons[option]->draw(window);
-		gameButtons[option]->update(window);
+		gameButtons[option]->update(window, eventSF);
 
 		if (gameButtons[option]->isPressed(window))
-			return option;
+			selectedOption = option;
+
 	}
 
-	return ButtonOptions::None;
+	return selectedOption;
 }
 
 float Motor::showCard(int cardKey, int posX, int posY)
@@ -210,29 +216,49 @@ float Motor::showCard(int cardKey, int posX, int posY)
 	return witdh;
 }
 
-ButtonOptions Motor::awaitForInput(Oponente* oponente, Crupier* crupier)
+void Motor::showPot(int pot)
 {
+	showText("BOTE ACTUAL: " + std::to_string(pot), width * 1.05, height * 0.3);
+}
+
+const ButtonOptions Motor::awaitForInput(bool preGame, Oponente* oponente, Crupier* crupier, int apuestaTotal, int apuestaSelect)
+{
+	if ((preGame && (apuestaTotal == -1 || apuestaSelect == -1)) || (!preGame && (apuestaTotal != -1 || apuestaSelect != -1)))
+		throw ("Non expected parameters values");
+
 	ButtonOptions opcion = ButtonOptions::None;
 
 	while (opcion == ButtonOptions::None && window.isOpen())
 	{
-		sf::Event eventSF;
 		while (window.pollEvent(eventSF))
 		{
 			if (eventSF.type == sf::Event::Closed)
 				window.close();
 
 			if (eventSF.type == sf::Event::Resized)
-				windowResized(eventSF);
+				windowResized();
 		}
 
 		// Prints the background
 		window.draw(*backgroundSprite);
 
-		oponente->mostrar(this);
-		crupier->mostrar(this, false);
+		if (preGame) // BETTING PHASE
+		{
+			oponente->mostrar(this);
+			crupier->mostrar(this, false);
+			showText("APUESTA TOTAL: " + std::to_string(apuestaTotal), 50.0f, 20.0f * 1.25);
+			showText("APUESTA SELECCIONADA PARA AÑADIR: " + std::to_string(apuestaSelect), 50.0f, 80.0f * 2.5);
+			opcion = execGameButtons(ButtonOptions::Subir, ButtonOptions::Empezar); // Updates button states and returns the selected option
+		}
+			
+		
+		else // GAME PHASE
+		{
+			if (partida != nullptr)
+				partida->mostrarEstadoJuego(false, false);
 
-		opcion = execGameButtons(); // Updates button states and returns the selected option
+			opcion = execGameButtons(ButtonOptions::Pedir, ButtonOptions::Pasar); // Updates button states and returns the selected option
+		}
 
 		// Shows objects
 		window.display();
@@ -252,6 +278,16 @@ void Motor::initWindow()
 	// Creates the window
 	window.create(sf::VideoMode(width, height), "Blackjack");
 
+	sf::Image icon;
+	if (!icon.loadFromFile("./assets/icon.png")) 
+	{
+		std::cerr << "Error: icon could not be loaded." << std::endl;
+		return;
+	}
+
+	// Configure window icon
+	window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
+
 	// Enables V-Sync (synchronizes the refresh rate of the graphics card with the refresh rate of the monitor)
 	window.setVerticalSyncEnabled(true);
 
@@ -263,37 +299,12 @@ void Motor::initWindow()
 	backgroundSprite->setPosition(0, 0);
 }
 
-void Motor::preGrame()
-{
-	for (Button* button : pregameButtons)
-	{
-		button->draw(window);
-		button->update(window);
-	}
-	
-	// Clears window
-	window.clear();
-}
-
 void Motor::goAhead()
 {
 	initWindow();
 
 	while (window.isOpen())
 	{
-		sf::Event eventSF;
-		while (window.pollEvent(eventSF))
-		{
-			if (eventSF.type == sf::Event::Closed)
-				window.close();
-
-			if (eventSF.type == sf::Event::Resized)
-				windowResized(eventSF);
-		}
-
-		// Prints the background
-		window.draw(*backgroundSprite);
-
 		// Call game logic
 		partida->jugar();
 	}

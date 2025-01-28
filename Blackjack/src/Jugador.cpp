@@ -14,15 +14,21 @@ Jugador::Jugador(Carta carta1, Carta carta2)
 void Jugador::actualizarPuntuacion()
 {
 	int punt = 0;
-	bool hayAs = false;
+	int nAses = 0;
+
 	for (int i = 0; i < nCartas; i++)
 	{
-		if (cartasJugador[i].getTipo() == Tipo::tAs)
-			hayAs = true;
 		punt += cartasJugador[i].getValor();
+		if (cartasJugador[i].getTipo() == Tipo::tAs)
+			nAses++;
 	}
-	if (hayAs && punt>21)
+
+	while (punt > 21 && nAses > 0)
+	{
 		punt -= 10;
+		nAses--;
+	}
+
 	puntuacion = punt;
 }
 
@@ -84,7 +90,9 @@ void Oponente::mostrar(Motor* motor)
 	for (int i = 0; i < nCartas; i++)
 		xPos += mostrarAux(xPos, yPos, cartasJugador, motor, i) + 10.f;
 
-	motor->showText("PUNTUACION OPONENTE: " + std::to_string(puntuacion), xPos, yPos * 1.25);
+	if (puntuacion > 0)
+		motor->showText("TU PUNTUACIÓN: " + std::to_string(puntuacion), xPos, yPos * 1.25);
+	motor->showText("TU BANCA: " + std::to_string(banca), motor->getWidth() * 1.05, motor->getHeight() * 0.2);
 }
 
 void Crupier::mostrar(Motor* motor, bool mostrarSegundaCarta)
@@ -107,4 +115,5 @@ void Crupier::mostrar(Motor* motor, bool mostrarSegundaCarta)
 
 	if (mostrarSegundaCarta)
 		motor->showText("PUNTUACION CRUPIER: " + std::to_string(puntuacion), xPos, yPos * 1.25);
+	motor->showText("BANCA CRUPIER: " + std::to_string(banca), motor->getWidth() * 1.05, motor->getHeight() * 0.1);
 }
