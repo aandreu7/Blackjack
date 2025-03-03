@@ -22,6 +22,7 @@
     <ClInclude Include="src\Baraja.h" />
     <ClInclude Include="src\Carta.h" />
     <ClInclude Include="src\Jugador.h" />
+    <ClInclude Include="src\Menu.h" />
     <ClInclude Include="src\Motor.h" />
     <ClInclude Include="src\Partida.h" />
     <ClInclude Include="src\puerto.h" />
@@ -31,8 +32,10 @@
     <ClCompile Include="src\Carta.cpp" />
     <ClCompile Include="src\Jugador.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Menu.cpp" />
     <ClCompile Include="src\Motor.cpp" />
     <ClCompile Include="src\Partida.cpp" />
+    <ClCompile Include="src\puerto.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -129,7 +132,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)\libs\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-system-d.lib;sfml-window-d.lib;sfml-graphics-d.lib</AdditionalDependencies>
+      <AdditionalDependencies>sfml-system-d.lib;sfml-window-d.lib;sfml-graphics-d.lib;sfml-audio-d.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

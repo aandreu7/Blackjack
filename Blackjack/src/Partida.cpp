@@ -9,8 +9,15 @@ Partida::Partida(Motor* nMotor)
 	motor = nMotor;
 
 	bote = 0;
+
+	dimApuesta = DIM_APUESTA_DEFAULT;
+
 	doblarPermitido = false;
 	juegoEmpezado = false;
+
+	baraja = nullptr;
+	oponente = nullptr;
+	crupier = nullptr;
 }
 
 Partida::~Partida()
@@ -95,17 +102,20 @@ void Partida::jugadorGana(Jugador* g, Jugador* p, bool empate)
 	else
 	{
 		std::cout << "EMPATE" << std::endl;
-		g->setBanca(g->getBanca() + bote / 2);
-		p->setBanca(p->getBanca() + bote / 2);
+		g->setBanca(g->getBanca() + g->getApuesta());
+		p->setBanca(p->getBanca() + p->getApuesta());
 	}
 
 	g->setApuesta(0);
 	p->setApuesta(0);
 }
 
-void Partida::repartirCartaAMano(Jugador* j)
+void Partida::repartirCartaAMano(Jugador* j, bool playSound)
 {
 	j->anadirCarta(baraja->repartirCarta());
+
+	if (playSound)
+		motor->playSound(0);
 }
 
 void Partida::mostrarEstadoJuego(bool mostrarCartasCrupier, bool sleep)
@@ -118,7 +128,7 @@ void Partida::mostrarEstadoJuego(bool mostrarCartasCrupier, bool sleep)
 	}
 	
 	if (sleep)
-		motor->sleepGame(mostrarCartasCrupier);
+		motor->sleepGame();
 }
 
 opcionJugador Partida::leerJugada()
@@ -176,21 +186,27 @@ void Partida::determinaGanador()
 {
 	mostrarEstadoJuego(true);
 
-	if (oponente->getPuntuacion() > 21) // OPONENTE SE PASA -> CRUPIER GANA
+	int puntosOponente = oponente->getPuntuacion();
+	int puntosCrupier = crupier->getPuntuacion();
+
+	if (puntosOponente > 21 || (puntosCrupier <= 21 && puntosCrupier > puntosOponente)) // OPONENTE SE PASA o CRUPIER TIENE MÁS PUNTOS -> CRUPIER GANA
+	{	
 		jugadorGana(crupier, oponente, false);
+		motor->showEndGameBackground(false);
+	}
 
-	else if (crupier->getPuntuacion() > 21) // CRUPIER SE PASA -> OPONENTE GANA
+	else if (puntosCrupier > 21 || puntosOponente > puntosCrupier) // CRUPIER SE PASA U OPONENTE TIENE MÁS PUNTOS -> OPONENTE GANA
+	{
 		jugadorGana(oponente, crupier, false);
-
-	else if (oponente->getPuntuacion() > crupier->getPuntuacion()) // OPONENTE GANA
-		jugadorGana(oponente, crupier, false);
-
-	else if (oponente->getPuntuacion() < crupier->getPuntuacion()) // CRUPIER GANA
-		jugadorGana(crupier, oponente, false);
+		motor->showEndGameBackground(true);
+	}
 
 	else // EMPATE
 		jugadorGana(crupier, oponente, true);
+
+	motor->sleepGame(true);
 }
+
 
 bool Partida::iniciarJuego(opcionJugador& op)
 {
@@ -202,11 +218,13 @@ bool Partida::iniciarJuego(opcionJugador& op)
 
 	baraja->barajar();
 
-	repartirCartaAMano(oponente);
-	repartirCartaAMano(oponente);
+	motor->playSound(0);
 
-	repartirCartaAMano(crupier);
-	repartirCartaAMano(crupier);
+	repartirCartaAMano(oponente, false);
+	repartirCartaAMano(oponente, false);
+
+	repartirCartaAMano(crupier, false);
+	repartirCartaAMano(crupier, false);
 
 	mostrarEstadoJuego();
 
@@ -233,33 +251,36 @@ bool Partida::iniciarJuego(opcionJugador& op)
 
 void Partida::apuestasIniciales()
 {
-	int apuestaActSeleccionada = 0;
 	int totalApostado = 0;
 
-	ButtonOptions opcion = ButtonOptions::None;
+	ButtonOptions opcion = ButtonOptions::NoneButtonOptions;
 
 	do
 	{
-		opcion = motor->awaitForInput(true, oponente, crupier, totalApostado, apuestaActSeleccionada);
+		opcion = motor->awaitForInput(true, oponente, crupier, totalApostado);
 
 		switch (opcion)
 		{
 		case ButtonOptions::Subir:
-			if (apuestaActSeleccionada < oponente->getBanca() && apuestaActSeleccionada < crupier->getBanca())
-				apuestaActSeleccionada = apuestaActSeleccionada + 10;
+			if (oponente->getBanca() >= dimApuesta && crupier->getBanca() >= dimApuesta)
+			{
+				oponente->setBanca(oponente->getBanca() - dimApuesta);
+				crupier->setBanca(crupier->getBanca() - dimApuesta);
+				totalApostado += dimApuesta;
+				motor->playSound(1);
+				oponente->setApuesta(oponente->getApuesta() + dimApuesta);
+				crupier->setApuesta(crupier->getApuesta() + dimApuesta);
+			}
 			break;
 		case ButtonOptions::Bajar:
-			if (apuestaActSeleccionada > 0)
-				apuestaActSeleccionada = apuestaActSeleccionada - 10;
-			break;
-		case ButtonOptions::Apostar:
-			if (oponente->getBanca() >= apuestaActSeleccionada && crupier->getBanca() >= apuestaActSeleccionada)
+			if (totalApostado > 0)
 			{
-				oponente->setApuesta(oponente->getApuesta() + apuestaActSeleccionada);
-				crupier->setApuesta(crupier->getApuesta() + apuestaActSeleccionada);
-				totalApostado += apuestaActSeleccionada;
-				oponente->setBanca(oponente->getBanca() - apuestaActSeleccionada);
-				crupier->setBanca(crupier->getBanca() - apuestaActSeleccionada);
+				oponente->setApuesta(oponente->getApuesta() - dimApuesta);
+				crupier->setApuesta(crupier->getApuesta() - dimApuesta);
+				totalApostado -= dimApuesta;
+				motor->playSound(1);
+				oponente->setBanca(oponente->getBanca() + dimApuesta);
+				crupier->setBanca(crupier->getBanca() + dimApuesta);
 			}
 			break;
 		default:
@@ -267,7 +288,7 @@ void Partida::apuestasIniciales()
 		}
 	} while (opcion != ButtonOptions::Empezar || totalApostado <= 0);
 
-	bote = totalApostado * 2;
+	bote = oponente->getApuesta() + crupier->getApuesta();
 }
 
 void Partida::jugar()
@@ -296,7 +317,7 @@ void Partida::jugar()
 			oponente->setApuesta(oponente->getApuesta() * 2);
 			crupier->setBanca(crupier->getBanca() - crupier->getApuesta());
 			crupier->setApuesta(crupier->getApuesta() * 2);
-			bote *= 2;
+			bote = oponente->getApuesta() + crupier->getApuesta();
 			repartirCartaAMano(oponente);
 			mostrarEstadoJuego();
 		}

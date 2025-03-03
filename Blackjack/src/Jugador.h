@@ -44,7 +44,10 @@ public:
 
 class Crupier : public Jugador
 {
+private:
+	bool segundaCartaYaMostrada;
 public:
+	Crupier() { segundaCartaYaMostrada = false; }
 	void mostrar(Motor* motor, bool mostrarSegundaCarta);
 };
 

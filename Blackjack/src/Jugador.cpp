@@ -84,36 +84,44 @@ float mostrarAux(float posX, float posY, Carta* cartas, Motor* motor, int i)
 
 void Oponente::mostrar(Motor* motor)
 {
-	float xPos = 50.0f;
-	float yPos = 1200.f;
+	float xPos = motor->getWidth() * 0.05;
+	float yPos = motor->getHeight() * 0.7;
 
 	for (int i = 0; i < nCartas; i++)
-		xPos += mostrarAux(xPos, yPos, cartasJugador, motor, i) + 10.f;
+		xPos += mostrarAux(xPos, yPos, cartasJugador, motor, i) + 0.01 * motor->getWidth();
 
 	if (puntuacion > 0)
 		motor->showText("TU PUNTUACIÓN: " + std::to_string(puntuacion), xPos, yPos * 1.25);
-	motor->showText("TU BANCA: " + std::to_string(banca), motor->getWidth() * 1.05, motor->getHeight() * 0.2);
+	motor->showText("TU BANCA: " + std::to_string(banca), motor->getWidth() * 0.9, motor->getHeight() * 0.2);
 }
 
 void Crupier::mostrar(Motor* motor, bool mostrarSegundaCarta)
 {
-	float xPos = 50.0f;
-	float yPos = 20.0f;
+	float xPos = motor->getWidth() * 0.05;
+	float yPos = motor->getHeight() * 0.05;
 
 	for (int i = 0; i < nCartas; i++)
 	{
 
 		// Crupier does not show the second card
-		if (nCartas == 2 && !mostrarSegundaCarta && i == 1)
+		if (nCartas == 2 && i == 1 && !segundaCartaYaMostrada)
 		{
-			motor->showCard(0, xPos, yPos);
-			break;
+			if (!mostrarSegundaCarta)
+			{
+				motor->showCard(0, xPos, yPos);
+				break;
+			}
+			else
+			{
+				motor->playSound(0);
+				segundaCartaYaMostrada = true;
+			}				
 		}
 
-		xPos += mostrarAux(xPos, yPos, cartasJugador, motor, i) + 10.f;
+		xPos += mostrarAux(xPos, yPos, cartasJugador, motor, i) + 0.01 * motor->getWidth();
 	}
 
 	if (mostrarSegundaCarta)
 		motor->showText("PUNTUACION CRUPIER: " + std::to_string(puntuacion), xPos, yPos * 1.25);
-	motor->showText("BANCA CRUPIER: " + std::to_string(banca), motor->getWidth() * 1.05, motor->getHeight() * 0.1);
+	motor->showText("BANCA CRUPIER: " + std::to_string(banca), motor->getWidth() * 0.9, motor->getHeight() * 0.1);
 }

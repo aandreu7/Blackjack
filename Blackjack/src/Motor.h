@@ -2,6 +2,8 @@
 
 #include "puerto.h"
 
+#include "Menu.h"
+
 class Oponente;
 class Crupier;
 
@@ -21,7 +23,13 @@ private:
 	sf::VideoMode desktop;
 	sf::Texture* backgroundTexture;
 	sf::Sprite* backgroundSprite;
+	sf::Texture* victoryBackgroundTexture;
+	sf::Texture* defeatBackgroundTexture;
 	sf::Event eventSF;
+	sf::Font font;
+	sf::SoundBuffer card_place_sound;
+	sf::SoundBuffer chips_stack_sound;
+	sf::Sound sound;
 
 	unsigned int width;
 	unsigned int height;
@@ -30,25 +38,27 @@ private:
 
 	std::vector<Button*> gameButtons;
 
+	Menu* mainMenu;
+
 	Partida* partida;
 
 public:
 
 	Motor();
 
-	~Motor() { cardTextures.clear(); cardSprites.clear(); cardMap.clear(); gameButtons.clear(); }
+	~Motor();
 
 	void goAhead();
 
-	const ButtonOptions awaitForInput(bool preGame, Oponente* oponente, Crupier* crupier, int actualizarBotonApuesta = -1, int apuestaSelect = -1);
+	const ButtonOptions awaitForInput(bool preGame, Oponente* oponente, Crupier* crupier, int apuestaTotal = -1);
 
-	void sleepGame(bool mostrarCartasCrupier);
+	void sleepGame(bool switchBackground=false);
 
 	int getCardKey(int valor, int palo) const { return (valor + palo * 100); }
 
 	const ButtonOptions execGameButtons(const int initOption, const int endOption);
 
-	void windowResized();
+	void windowResized(sf::Sprite* background);
 
 	void initWindow();
 
@@ -57,6 +67,14 @@ public:
 	void showText(const std::string& text, int posX, int posY);
 
 	void showPot(int pot);
+
+	void showEndGameBackground(bool victory);
+	
+	void resetButtons();
+
+	void playSound(char soundIndex);
+
+	void adjustBackground(sf::Sprite* background);
 
     // Getters
 	const std::string& getCardFolder() const { return cardFolder; }	
@@ -68,6 +86,8 @@ public:
 	const sf::VideoMode& getDesktop() const { return desktop; }
 	const sf::Texture* getBackgroundTexture() const { return backgroundTexture; }
 	const sf::Sprite* getBackgroundSprite() const { return backgroundSprite; }
+	sf::Event& getEventSF() { return eventSF; }
+	sf::Font& getFont() { return font; }
 	const unsigned int getWidth() const { return width; }
 	const unsigned int getHeight() const { return height; }
 };

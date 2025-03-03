@@ -23,6 +23,8 @@ public:
 
     void apuestasIniciales();
 
+    void setDimApuesta(int nDimApuesta) { dimApuesta = nDimApuesta; }
+
 	int getBote() const { return bote; }
 
     bool doblarPermitido;
@@ -38,8 +40,10 @@ private:
 
     int bote;
 
+    int dimApuesta;
+
     void jugadorGana(Jugador* ganador, Jugador* perdedor, bool empate);
-    void repartirCartaAMano(Jugador* jugador);
+    void repartirCartaAMano(Jugador* jugador, bool playSound=true);
     void mostrarEstadoJuego(bool mostrarCartasCrupier = false, bool sleep = true);
     opcionJugador leerJugada();
     void crupierJuega();

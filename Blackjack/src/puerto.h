@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 
 #include "assert.h"
 #include <Windows.h>
@@ -22,6 +23,12 @@ namespace fs = std::filesystem;
 #define NUM_CARTAS 52
 
 #define NUM_BUTTONS 7
+
+constexpr int DIM_APUESTA_DEFAULT = 10;
+
+constexpr int BUTTON_SIZE = 200;
+
+// =============================== ENUMS, STRUCTS, NAMESPACES ===============================
 
 namespace simbolosPalo
 {
@@ -65,33 +72,45 @@ enum class opcionJugador
 	Doblar,
     Subir,
     Bajar,
-    Apostar,
     Empezar
 };
 
 enum class rolJugador
 {
-	None,
+	NoneRoljugador,
 	Oponente,
 	Crupier
 };
 
 typedef enum
 {
-    None = -1,
+    NoneButtonOptions = -1,
     Pedir,
     Doblar,
     Pasar,
     Subir,
     Bajar,
-    Apostar,
     Empezar
 }ButtonOptions;
 
-template <typename T>
-void freeMemory(T*& ptr, bool isArray = false) 
+typedef enum
 {
-    if (ptr != nullptr) 
+    NoneMenuButtonOptions = -1,
+    Jugar,
+    Salir
+}MenuButtonOptions;
+
+// =============================== ENUMS, STRUCTS, NAMESPACES ===============================
+
+
+
+
+// =============================== FUNCTIONS ===============================
+
+template <typename T>
+void freeMemory(T*& ptr, bool isArray = false)
+{
+    if (ptr != nullptr)
     {
         if (isArray)
             delete[] ptr;
@@ -101,12 +120,23 @@ void freeMemory(T*& ptr, bool isArray = false)
     }
 }
 
+void initBackground(sf::Sprite* background, const sf::Window& window);
+
+std::unordered_map<int, sf::Sprite*> loadTexturesFromDirectory(int width, int height, const std::string& cardFolder, std::vector<sf::Texture*>& cardTextures, 
+    std::vector<sf::Sprite*>& cardSprites);
+
+// =============================== FUNCTIONS ===============================
+
+
+
+
 class Button 
 {
 private:
     sf::RectangleShape buttonShape;
     sf::Text buttonText;
     sf::Font font;
+    sf::Texture buttonTexture;
     sf::Color defaultColor;
     sf::Color hoverColor;
     sf::Color clickColor;
@@ -116,19 +146,23 @@ private:
     bool wasPressed;
 
 public:
-    Button(float x, float y, float width, float height, const std::string& text) 
+    Button(float x, float y, float width, float height, const std::string& text, const std::string& textureFile = "")
     {
         buttonShape.setSize(sf::Vector2f(width, height));
         buttonShape.setPosition(x, y);
 
         if (!font.loadFromFile("./assets/PlayfairDisplay-Black.ttf"))
-            std::cerr << "Source " << std::endl;
+            std::cerr << "Error al cargar la fuente" << std::endl;
 
         buttonText.setFont(font);
         buttonText.setString(text);
         buttonText.setCharacterSize(30);
         buttonText.setFillColor(sf::Color::White);
-        buttonText.setPosition(x + width / 4, y + height / 4);
+        
+        if (!textureFile.empty() && buttonTexture.loadFromFile(textureFile))
+            buttonShape.setTexture(&buttonTexture);
+        
+        buttonText.setPosition(x + width / 4, y + height / 3);
 
         defaultColor = sf::Color(100, 100, 250);
         hoverColor = sf::Color(150, 150, 255);
@@ -183,6 +217,12 @@ public:
     bool isPressed(sf::RenderWindow& window) 
     {
         return isClicked;
+    }
+
+    void reset()
+    {
+        if (this && wasPressed)
+            wasPressed = false;
     }
 
     const std::string& getText() const { return buttonText.getString(); }
